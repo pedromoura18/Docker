@@ -1,13 +1,12 @@
-FROM php:7.4-cli
+FROM php:7.4-cli AS builder
 
 WORKDIR /var/www
 
-RUN apt-get update && \ 
-    apt-get install libzip-dev -y && \
+RUN apt-get update && \
+    apt-get install -y libzip-dev unzip git && \
     docker-php-ext-install zip
 
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
-    php -r "if (hash_file('sha384', 'composer-setup.php') === '') \
     php composer-setup.php && \
     php -r "unlink('composer-setup.php');"
 
@@ -21,7 +20,7 @@ RUN rm -rf /var/www/html
 
 COPY --from=builder /var/www/laravel .
 
-RUN chown -R www-data:www-data /var /www
+RUN chown -R www-data:www-data /var/www
 RUN ln -s public html
 
 EXPOSE 9000
